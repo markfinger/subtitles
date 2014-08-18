@@ -20,8 +20,12 @@ for i, sub in enumerate(manifest):
             os.makedirs(image_dir)
         filename = image.rstrip('/').split('/')[-1]
         image_path = image_dir + ('/%s' % filename)
-        # import pdb; pdb.set_trace()
-        urllib.urlretrieve(image, image_path)
+        if not os.path.exists(image_path):
+            try:
+                urllib.urlretrieve(image, image_path)
+                print 'Fine: ', image, image_path
+            except:
+                print 'Error: ', image, image_path
 
 # def write_manifest(manifest):
 #     with open('star-wars/manifest.json', 'w') as manifest_file:

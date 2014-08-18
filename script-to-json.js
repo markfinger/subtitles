@@ -5,8 +5,7 @@ var arguments = process.argv.slice(2);
 
 var fileName = arguments[0];
 
-console.log('Processing: ' + fileName);
-console.log();
+console.log('Processing: ' + fileName + '\n');
 
 var character =     '                                     ';
 var speech =        '                         ';
@@ -23,7 +22,7 @@ fs.readFile(fileName, 'ascii', function (err, data) {
       text = text.slice(1);
     }
 
-    obj = {
+    var obj = {
       text: text
     };
 
@@ -49,34 +48,31 @@ fs.readFile(fileName, 'ascii', function (err, data) {
     return obj;
   });
 
-  var summedLines = [lines[0]];
+  var compressedLines = [lines[0]];
   var current;
   var previous;
   for (var i=1; i<lines.length; i++) {
     current = lines[i];
-    previous = _.last(summedLines);
-    if (current.type === 'empty') {
-      continue;
-    } else if (previous.type === current.type) {
-        previous.text += ' ' + current.text;
-    } else {
-      summedLines.push(current);
+    previous = _.last(compressedLines);
+    if (current.type !== 'empty') {
+      if (previous.type === current.type) {
+          previous.text += ' ' + current.text;
+      } else {
+        compressedLines.push(current);
+      }
     }
   }
 
   console.log('Total lines: ' + lines.length);
-  console.log('Total summed lines: ' + summedLines.length);
-  console.log('Character lines: ' + _.where(summedLines, {type:'character'}).length);
-  console.log('Speech lines: ' + _.where(summedLines, {type:'speech'}).length);
-  console.log('Opening text: ' + _.where(summedLines, {type:'opening-text'}).length);
-  console.log('Schene changes: ' + _.where(summedLines, {type:'scene-change'}).length);
-  console.log('Description: ' + _.where(summedLines, {type:'description'}).length);
-  console.log('Empty: ' + _.where(summedLines, {type:'empty'}).length);
-  console.log('Unknown: ' + _.where(summedLines, {type:'unknown'}).length);
+  console.log('Total summed lines: ' + compressedLines.length);
+  console.log('Character lines: ' + _.where(compressedLines, { type:'character' }).length);
+  console.log('Speech lines: ' + _.where(compressedLines, { type:'speech' }).length);
+  console.log('Opening text: ' + _.where(compressedLines, { type:'opening-text' }).length);
+  console.log('Scene changes: ' + _.where(compressedLines, { type:'scene-change' }).length);
+  console.log('Description: ' + _.where(compressedLines, { type:'description' }).length);
+  console.log('Empty: ' + _.where(compressedLines, { type:'empty' }).length);
+  console.log('Unknown: ' + _.where(compressedLines, { type:'unknown' }).length);
   console.log();
 
-  console.log(_(summedLines).where({type:'character'}).pluck('text').uniq())
-
-  fs.writeFile(fileName + '.json', JSON.stringify(summedLines, null, 2));
-
+  fs.writeFile(fileName + '.json', JSON.stringify(compressedLines, null, 2));
 });
